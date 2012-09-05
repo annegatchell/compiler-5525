@@ -12,6 +12,7 @@ import sys
 import compiler
 
 
+
 def main():
 	if(len(sys.argv) != 2):
 		print 'Usage: compile.py <file_name>'
