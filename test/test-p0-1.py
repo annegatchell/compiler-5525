@@ -1,1 +1,1 @@
-print -input() + input()
+3
