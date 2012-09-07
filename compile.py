@@ -27,22 +27,22 @@ def is_leaf(ast):
 
 def flatten(ast):
 	if isinstance(ast,Module):
-		print 'MODULE'
+		#print 'MODULE'
 		return Module(ast.doc, flatten(ast.node))
 	elif isinstance(ast,Stmt):
-		print 'STMT'
+		#print 'STMT'
 		fnodes = []
 		fnodes = map(flatten, ast.nodes)
-		print 'fnodes before sum', fnodes
+		#print 'fnodes before sum', fnodes
 		fnodes = sum(fnodes, [])
-		print 'fnodes after sum',fnodes
+		#print 'fnodes after sum',fnodes
 		return Stmt(fnodes)
 	elif isinstance(ast, Printnl):
 		nodes = map(flatten, ast.nodes)
 		prints = []
 		for (t,l) in nodes:
 			if not is_leaf(t):
-				temp = new_temp('print')
+				temp = temp_gen('print')
 				l.append(Assign([AssName(temp, 'OP_ASSIGN')], t))
 				prints.append(Name(temp))
 			else:
@@ -50,53 +50,53 @@ def flatten(ast):
 		stmts = sum([l for (t, l) in nodes], [])
 		return stmts + [Printnl(prints, ast.dest)]
 	elif isinstance(ast, Assign):
-		print 'ASSIGN'
-		print 'assign',ast
+		#print 'ASSIGN'
+		#print 'assign',ast
 		fnodes = map(flatten, ast.nodes)
 		assigns = [t for (t, l) in fnodes]
 		stmts = sum([l for (t, l) in fnodes], [])
 		targ_node, targ_stmts = flatten(ast.expr)
 		return stmts + targ_stmts + [Assign(assigns, targ_node)]
 	elif isinstance(ast, AssName):
-		print 'ASSNAME'
+		#print 'ASSNAME'
 		return (ast,[])
 	elif isinstance(ast, Discard):
-		print 'DISCARD'
+		#print 'DISCARD'
 		expr, stmts = flatten(ast.expr)
-		print 'discard',expr, stmts
+		#print 'discard',expr, stmts
 		return stmts + [Discard(expr)]
 	elif isinstance(ast, Const):
-		print 'CONST'
+		#print 'CONST'
 		return (ast,[])
 	elif isinstance(ast, Name):
-		print 'NAME'
+		#print 'NAME'
 		return (ast, [])
 	elif isinstance(ast, Add):
-		print 'ADD'
+		#print 'ADD'
 		lexpr, lstmts = flatten(ast.left)
 		rexpr, rstmts = flatten(ast.right)
 		if not is_leaf(lexpr):
-			temp = new_temp("left")
+			temp = temp_gen("left")
 			lstmts.append(Assign([AssName(temp, 'OP_ASSIGN')], lexpr))
 			lexpr = Name(temp)
 		if not is_leaf(rexpr):
-			temp = new_temp("right")
+			temp = temp_gen("right")
 			rstmts.append(Assign([AssName(temp, 'OP_ASSIGN')], rexpr))
 			rexpr = Name(temp)
 		return (Add((lexpr, rexpr)), lstmts + rstmts)
 	elif isinstance(ast, UnarySub):
-		print 'UNARYSUB'
+		#print 'UNARYSUB'
 		expr, stmts = flatten(ast.expr)
 		if not is_leaf(expr):
-			temp = new_temp("usub")
+			temp = temp_gen("usub")
 			stmts.append(Assign([AssName(temp, 'OP_ASSIGN')], expr))
 			expr = Name(temp)
 		return (UnarySub(expr), stmts)
 	elif isinstance(ast, CallFunc):
-		print 'CALLFUNC'
+		#print 'CALLFUNC'
 		expr, stmts = flatten(ast.node)
 		if not is_leaf(expr):
-			temp = new_temp("func")
+			temp = temp_gen("func")
 			stmts.append(Assign([AssName(temp, 'OP_ASSIGN')], expr))
 			expr = Name(temp)
 		args_exprs = []
@@ -104,12 +104,12 @@ def flatten(ast):
 		for arg in ast.args:
 			arg_expr, arg_stmts = flatten(arg)
 			if not is_leaf(arg_expr):
-				temp = new_temp("arg")
+				temp = temp_gen("arg")
 				arg_stmts.append(Assign([AssName(temp, 'OP_ASSIGN')], arg_expr))
 				arg_expr = Name(temp)
 			args_exprs.append(arg_expr)
 			args_stmts = args_stmts + arg_stmts
-			return (CallFunc(expr, args_exprs), stmts + args_stmts)
+		return (CallFunc(expr, args_exprs), stmts + args_stmts)
 	else:
 	 	raise Exception('Error in flatten: unrecognized AST node')
 
@@ -210,9 +210,9 @@ def write_to_file(assembly, outputFileName):
 
 def main():
 	platform = sys.platform
-	print 'Running on a',platform
+	#print 'Running on a',platform
 	if(len(sys.argv) != 2):
-		print 'Usage: compile.py <file_name>'
+		sys.stderr.write(str(argv[0]) + " requires two arguments\n")
 		return 1;
 	inputFile = sys.argv[1]
 	inputFilePath = str(sys.argv[1])
@@ -226,9 +226,9 @@ def main():
 	
 	ast = compiler.parseFile(inputFile);
 
-	print ast, '\n\n\n'
+	#print ast, '\n\n\n'
 	fast = flatten(ast)
-	print 'flatten(ast)\n',fast
+	#print 'flatten(ast)\n',fast
 	assembly = instr_select(fast)
 
 	write_to_file(map(str, assembly), outputFileName)
