@@ -14,7 +14,7 @@ import sys
 import compiler
 from compiler.ast import *
 from x86ast import *
-
+from parse import parse_file
 
 
 temp_counter = -1
@@ -232,8 +232,10 @@ def main():
 	outputFileName = (outputFilePath[-1:])[0]
 	outputFileName = outputFileName[:-3] + ".s"
 
-	print inputFile
-	ast = compiler.parseFile(inputFile);
+	#print inputFile
+	#ast = compiler.parseFile(inputFile);
+	print 'compile'+inputFilePath
+	ast = parse_file(inputFilePath);
 
 	print ast, '\n\n\n'
 	fast = flatten(ast)

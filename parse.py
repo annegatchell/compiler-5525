@@ -115,16 +115,15 @@ x=4
 print x
 '''
 
-ast = yacc.parse(data)
-print ast
+#ast = yacc.parse(data)
+#print ast
 
-def ParseFile(FilePath):
-      inputFile = open(filePath)
+def parse_file(file_path):
+      print 'parse'+file_path
+      inputFile = open(file_path)
       source = inputFile.read()
       inputFile.close()
 
       ast = yacc.parse(source)
-
-      print ast
-
       return ast
+
