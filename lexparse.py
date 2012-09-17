@@ -30,7 +30,13 @@ reserved = {
 }
 
 # List of token names.   This is always required
-tokens = ['PLUS','MINUS','LPAREN','RPAREN','ASSIGN','INT','NAME',] + list(reserved.values())
+tokens = ['PLUS',
+		'MINUS',
+		'LPAREN',
+		'RPAREN',
+		'EQUALS',
+		'INT',
+		'NAME',] + list(reserved.values())
 
 # Regular expression rules for simple tokens
 t_PLUS    = r'\+'
@@ -38,7 +44,7 @@ t_MINUS   = r'-'
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
 t_INPUT = r'input'
-t_ASSIGN = r'\='
+t_EQUALS = r'\='
 t_PRINT = r'print'
 
 # A regular expression rule with some action code
@@ -63,6 +69,8 @@ def t_newline(t):
 
 # A string containing ignored characters (spaces and tabs)
 t_ignore  = ' \t'
+# Ignore Comments
+t_ignore_COMMENT = r'\#.*'
 
 # Error handling rule
 def t_error(t):
@@ -72,18 +80,21 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
+
+
+
 # Test it out
-data = '''
-x=4
--input() + 5
-print x
-'''
+# data = '''
+# x=4
+# -input() + 5
+# print x
+# '''
 
 # Give the lexer some input
-lexer.input(data)
+#lexer.input(data)
 
 # Tokenize
-while True:
-    tok = lexer.token()
-    if not tok: break      # No more input
-    print tok
+# while True:
+#     tok = lexer.token()
+#     if not tok: break      # No more input
+#     print tok

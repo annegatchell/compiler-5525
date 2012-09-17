@@ -232,7 +232,7 @@ def main():
 	outputFileName = (outputFilePath[-1:])[0]
 	outputFileName = outputFileName[:-3] + ".s"
 
-	
+	print inputFile
 	ast = compiler.parseFile(inputFile);
 
 	print ast, '\n\n\n'
