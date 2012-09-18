@@ -70,7 +70,7 @@ def p_statement_list_single(p):
 
 def p_print_statement(p):
       'statement : PRINT expression'
-      p[0] = Printnl([p[2]],None)
+      p[0] = Printnl(p[2],None)
 
 def p_name_expression_statement(p):
       'statement : NAME EQUALS expression'
@@ -128,7 +128,5 @@ def parse_file(file_path):
       inputFile.close()
 
       ast = yacc.parse(source)
-      if(print_stmts):
-            print ast
       return ast
 

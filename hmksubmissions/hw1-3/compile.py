@@ -14,10 +14,6 @@ import sys
 import compiler
 from compiler.ast import *
 from x86ast import *
-from parse import parse_file
-
-
-print_stmts = 0
 
 temp_counter = -1
 
@@ -31,8 +27,7 @@ def is_leaf(ast):
 
 def flatten(ast):
 	if isinstance(ast,Module):
-		if(print_stmts):
-			print 'IN MODULE', Module(ast.doc, flatten(ast.node))
+		#print 'MODULE'
 		return Module(ast.doc, flatten(ast.node))
 	elif isinstance(ast,Stmt):
 		#print 'STMT'
@@ -41,8 +36,6 @@ def flatten(ast):
 		#print 'fnodes before sum', fnodes
 		fnodes = sum(fnodes, [])
 		#print 'fnodes after sum',fnodes
-		if(print_stmts):
-			print 'IN STMT',Stmt(fnodes)
 		return Stmt(fnodes)
 	elif isinstance(ast, Printnl):
 		nodes = map(flatten, ast.nodes)
@@ -55,8 +48,6 @@ def flatten(ast):
 			else:
 				prints.append(t)
 		stmts = sum([l for (t, l) in nodes], [])
-		if(print_stmts):
-			print 'IN PRINT STATEMENTS',stmts + [Printnl(prints, ast.dest)]
 		return stmts + [Printnl(prints, ast.dest)]
 	elif isinstance(ast, Assign):
 		#print 'ASSIGN'
@@ -65,27 +56,20 @@ def flatten(ast):
 		assigns = [t for (t, l) in fnodes]
 		stmts = sum([l for (t, l) in fnodes], [])
 		targ_node, targ_stmts = flatten(ast.expr)
-		if(print_stmts):
-			print 'IN ASSIGN',(stmts + targ_stmts + [Assign(assigns, targ_node)])
 		return stmts + targ_stmts + [Assign(assigns, targ_node)]
 	elif isinstance(ast, AssName):
 		#print 'ASSNAME'
-		if(print_stmts):
-			print 'IN ASS NAME',(ast, [])
 		return (ast,[])
 	elif isinstance(ast, Discard):
 		#print 'DISCARD'
 		expr, stmts = flatten(ast.expr)
-		if(print_stmts):
-			print 'IN DISCARD', stmts + [Discard(expr)]
+		#print 'discard',expr, stmts
 		return stmts + [Discard(expr)]
 	elif isinstance(ast, Const):
-		if(print_stmts):
-			print 'IN THE CONST', (ast,[])
+		#print 'CONST'
 		return (ast,[])
 	elif isinstance(ast, Name):
-		if(print_stmts):
-			print 'IN THE NAME', (ast, [])
+		#print 'NAME'
 		return (ast, [])
 	elif isinstance(ast, Add):
 		#print 'ADD'
@@ -99,8 +83,6 @@ def flatten(ast):
 			temp = temp_gen("right")
 			rstmts.append(Assign([AssName(temp, 'OP_ASSIGN')], rexpr))
 			rexpr = Name(temp)
-		if(print_stmts):
-			print 'IN THE ADD',(Add((lexpr, rexpr)), lstmts + rstmts)
 		return (Add((lexpr, rexpr)), lstmts + rstmts)
 	elif isinstance(ast, UnarySub):
 		#print 'UNARYSUB'
@@ -109,8 +91,6 @@ def flatten(ast):
 			temp = temp_gen("usub")
 			stmts.append(Assign([AssName(temp, 'OP_ASSIGN')], expr))
 			expr = Name(temp)
-		if(print_stmts):
-			print 'IN THE UNARYSUB',(UnarySub(expr), stmts)
 		return (UnarySub(expr), stmts)
 	elif isinstance(ast, CallFunc):
 		#print 'CALLFUNC'
@@ -129,11 +109,9 @@ def flatten(ast):
 				arg_expr = Name(temp)
 			args_exprs.append(arg_expr)
 			args_stmts = args_stmts + arg_stmts
-		if(print_stmts):
-			print 'IN THE CALLFUNC', (CallFunc(expr, args_exprs), stmts + args_stmts)
 		return (CallFunc(expr, args_exprs), stmts + args_stmts)
 	else:
-	 	raise Exception('Error in flatten: unrecognized AST node'+ str(ast))
+	 	raise Exception('Error in flatten: unrecognized AST node')
 
 def scan_allocs(ast):
 	if isinstance(ast, Module):
@@ -245,22 +223,13 @@ def main():
 	outputFileName = (outputFilePath[-1:])[0]
 	outputFileName = outputFileName[:-3] + ".s"
 
-	#print inputFile
-	#ast = compiler.parseFile(inputFile);
-	if(print_stmts):
-		print 'compile'+inputFilePath
-	ast = parse_file(inputFilePath);
+	
+	ast = compiler.parseFile(inputFile);
 
-	if(print_stmts):
-		print ast, '\n\n\n'
+	#print ast, '\n\n\n'
 	fast = flatten(ast)
-
 	#print 'flatten(ast)\n',fast
-	if(print_stmts):
-		print fast
 	assembly = instr_select(fast)
-	if(print_stmts):
-		print assembly
 
 	write_to_file(map(str, assembly), outputFileName)
 

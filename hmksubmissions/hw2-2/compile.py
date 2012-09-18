@@ -133,7 +133,7 @@ def flatten(ast):
 			print 'IN THE CALLFUNC', (CallFunc(expr, args_exprs), stmts + args_stmts)
 		return (CallFunc(expr, args_exprs), stmts + args_stmts)
 	else:
-	 	raise Exception('Error in flatten: unrecognized AST node'+ str(ast))
+	 	raise Exception('Error in flatten: unrecognized AST node')
 
 def scan_allocs(ast):
 	if isinstance(ast, Module):
