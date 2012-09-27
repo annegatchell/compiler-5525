@@ -187,7 +187,7 @@ def instr_select(ast, value_mode=Move86):
 		return [value_mode(Mem86(stack_map[ast.name], EBP), EAX)]
 	else:
 		raise Exception("Unexpected term: " + str(ast))
-
+"""
 word_size = 4
 def compile_stmt(ast, value_mode='movl'):
 	global stack_map
@@ -221,7 +221,7 @@ def compile_stmt(ast, value_mode='movl'):
 		return [('%s -%d(%%ebp), %%eax' % (value_mode, stack_map[ast.name]))]
 	else:
 		raise Exception("Unexpected term: " + str(ast))
-
+"""
 def write_to_file(assembly, outputFileName):
 	"""Function to write assembly to file"""
 	assembly = '.globl main\nmain:\n\t' + '\n\t'.join(assembly)
@@ -255,10 +255,11 @@ def main():
 		print ast, '\n\n\n'
 	fast = flatten(ast)
 
-	#print 'flatten(ast)\n',fast
+	print 'flatten(ast)\n',fast,'\n'
 	if(print_stmts):
 		print fast
 	assembly = instr_select(fast)
+	print assembly
 	if(print_stmts):
 		print assembly
 
