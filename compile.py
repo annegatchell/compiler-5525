@@ -187,6 +187,33 @@ def instr_select(ast, value_mode=Move86):
 		return [value_mode(Mem86(stack_map[ast.name], EBP), EAX)]
 	else:
 		raise Exception("Unexpected term: " + str(ast))
+
+def instr_select_vars(ast, value_mode=Move86):
+	if isinstance(ast,Module):
+		return instr_select_vars(ast.node)
+	elif isinstance(ast, Stmt):
+		return sum(map(instr_select_vars, ast.nodes),[])
+	elif isinstance(ast, Printnl):
+		return instr_select_vars(ast.nodes[0]) + [Push86(EAX), Call86('print_int_nl'), Add86(Const86(4),ESP)]
+	elif isinstance(ast, Assign):
+		expr_assemb = instr_select_vars(ast.expr)
+		return expr_assemb + [Move86(EAX, Mem86(offset, EBP))]
+	elif isinstance(ast, Discard):
+		return instr_select(ast.expr)
+	elif isinstance(ast, Add):
+		return instr_select(ast.left) + instr_select(ast.right, value_mode=Add86)
+	elif isinstance(ast, UnarySub):
+		return instr_select(ast.expr) + [Neg86(EAX)]
+	elif isinstance(ast, CallFunc):
+		return [Call86('input')]
+	elif isinstance(ast, Const):
+		return [value_mode(Const86(ast.value), EAX)]
+	elif isinstance(ast, Name):
+		return [value_mode(Mem86(stack_map[ast.name], EBP), EAX)]
+	else:
+		raise Exception("Unexpected term: " + str(ast))
+
+
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
 
@@ -215,10 +242,10 @@ def main():
 	outputFileName = outputFileName[:-3] + ".s"
 
 	#print inputFile
-	#ast = compiler.parseFile(inputFile);
+	ast = compiler.parseFile(inputFile);
 	if(print_stmts):
 		print 'compile'+inputFilePath
-	ast = parse_file(inputFilePath);
+	#ast = parse_file(inputFilePath);
 
 	if(print_stmts):
 		print ast, '\n\n\n'
@@ -232,7 +259,7 @@ def main():
 	if(print_stmts):
 		print assembly
 
-	write_to_file(map(str, assembly), outputFileName)
+	#write_to_file(map(str, assembly), outputFileName)
 
 	return 0
 
