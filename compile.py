@@ -232,14 +232,6 @@ def liveness_analysis(instr_list):
 	return liveness
 
 def create_intrf_graph(instr_list, live_list):
-	test = {'anne':set([26, 13]), 'mario':set([23, 13])}
-	test['anne'] = test['anne'] | set([13, 15, 15, 16])
-	test['ben'] = set([23, 22])
-
-	print test
-	test1 = {}
-	test1[str(instr_list[0].target)] = test['anne']
-	print test1
 
 	interference_graph = {}
 	for i in range(0, len(instr_list)-1):
@@ -288,6 +280,7 @@ def create_intrf_graph(instr_list, live_list):
 
 	for key in interference_graph:
 		print key,":",map(str,interference_graph[key])
+	return interference_graph
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
@@ -335,7 +328,7 @@ def main():
 	print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
-	create_intrf_graph(assembly, liveness)
+	intrf_graph = create_intrf_graph(assembly, liveness)
 	#write_to_file(map(str, assembly), outputFileName)
 
 	return 0
