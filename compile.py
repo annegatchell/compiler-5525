@@ -13,7 +13,7 @@ Usage: compile.py <file_name>
 import sys
 import compiler
 from compiler.ast import *
-from x86ast import *
+from semix86 import *
 from parse import parse_file
 
 
@@ -76,9 +76,12 @@ def flatten(ast):
 	elif isinstance(ast, Discard):
 		#print 'DISCARD'
 		expr, stmts = flatten(ast.expr)
+		temp = temp_gen("discard")
+		stmts.append(Assign([AssName(temp, 'OP_ASSIGN')], expr))
+		#expr = Name(temp)
 		if(print_stmts):
 			print 'IN DISCARD', stmts + [Discard(expr)]
-		return stmts + [Discard(expr)]
+		return stmts
 	elif isinstance(ast, Const):
 		if(print_stmts):
 			print 'IN THE CONST', (ast,[])
@@ -194,22 +197,27 @@ def instr_select_vars(ast, value_mode=Move86):
 	elif isinstance(ast, Stmt):
 		return sum(map(instr_select_vars, ast.nodes),[])
 	elif isinstance(ast, Printnl):
-		return instr_select_vars(ast.nodes[0]) + [Push86(EAX), Call86('print_int_nl'), Add86(Const86(4),ESP)]
+		return  [Push86(instr_select_vars(ast.nodes[0])), Call86('print_int_nl'), Add86(Const86(4),ESP)]
 	elif isinstance(ast, Assign):
-		expr_assemb = instr_select_vars(ast.expr)
-		return expr_assemb + [Move86(EAX, Mem86(offset, EBP))]
-	elif isinstance(ast, Discard):
-		return instr_select(ast.expr)
-	elif isinstance(ast, Add):
-		return instr_select(ast.left) + instr_select(ast.right, value_mode=Add86)
-	elif isinstance(ast, UnarySub):
-		return instr_select(ast.expr) + [Neg86(EAX)]
+		if isinstance(ast.expr, Add):
+			expr_setup = [Move86(instr_select_vars(ast.expr.left), Var(ast.nodes[0].name))]
+			return expr_setup + [Add86(instr_select_vars(ast.expr.right), Var(ast.nodes[0].name))]
+		elif isinstance(ast.expr, UnarySub):
+			expr_setup = [Move86(instr_select_vars(ast.expr.expr), Var(ast.nodes[0].name))]
+			return expr_setup + [Neg86(Var(ast.nodes[0].name))]
+		elif isinstance(ast.expr, CallFunc):
+			expr_setup = instr_select_vars(ast.expr)
+			return expr_setup + [Move86(EAX, Var(ast.nodes[0].name))]
+		else:
+			return [Move86(instr_select_vars(ast.expr), Var(ast.nodes[0].name))]
 	elif isinstance(ast, CallFunc):
 		return [Call86('input')]
 	elif isinstance(ast, Const):
-		return [value_mode(Const86(ast.value), EAX)]
+		return Const86(ast.value)
 	elif isinstance(ast, Name):
-		return [value_mode(Mem86(stack_map[ast.name], EBP), EAX)]
+		return Var(ast.name)
+	elif isinstance(ast, AssName):
+		return []
 	else:
 		raise Exception("Unexpected term: " + str(ast))
 
@@ -254,10 +262,10 @@ def main():
 	print 'flatten(ast)\n',fast,'\n'
 	if(print_stmts):
 		print fast
-	assembly = instr_select(fast)
-	print assembly
-	if(print_stmts):
-		print assembly
+	assembly = instr_select_vars(fast)
+	for i in assembly:
+		print i
+	print map(str, assembly)
 
 	#write_to_file(map(str, assembly), outputFileName)
 

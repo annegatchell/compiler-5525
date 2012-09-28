@@ -1,5 +1,5 @@
 x = 4
-y = 5
+y = - input()
 z = x + y
 y = x + z
 x = input() + 2

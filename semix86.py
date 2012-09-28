@@ -25,7 +25,7 @@ class Var(X86Arg):
     def  __init__(self, name):
         self.name = name
     def mnemonic(self):
-        return self.name
+        return '' + self.name
     
 class X86Inst:
     def __str__(self):
