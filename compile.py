@@ -201,17 +201,17 @@ def get_written_vars(instr):
 	l = []
 	if isinstance(instr, Move86) or isinstance(instr,Add86) or isinstance(instr, Neg86):
 		if isinstance(instr.target, Var):
-			l.append(instr.target)	
+			l.append(instr.target.name)	
 	return l
 
 def get_read_vars(instr):
 	l = []
 	if isinstance(instr, Push86) or isinstance(instr, Move86) or isinstance(instr, Add86):
 		if isinstance(instr.value, Var):
-			l.append(instr.value)
+			l.append(instr.value.name)
 	if isinstance(instr, Add86) or isinstance(instr, Neg86):
 		if isinstance(instr.target, Var):
-			l.append(instr.target)
+			l.append(instr.target.name)
 	return l
 
 def liveness_analysis(instr_list):
@@ -220,16 +220,22 @@ def liveness_analysis(instr_list):
 	# print liveness[0]
 	# liveness.append(Live_vars(set([1,2,2,3,4]), set([5,5,6,7,7,8])))
 	# print liveness[1]
+
+
+
 	for i in range(0,len(instr_list)-1):
-		actual_i = len(instr_list)-1-i
-		w_var = get_written_vars(instr_list[i])
-		r_var = get_read_vars(instr_list[i])
-		# print 'r ',r_var,' w ',w_var
-		before = (liveness[i].after - set(w_var)) | set(r_var)
+		instr_list_i = len(instr_list)-1-i
+		w_var = get_written_vars(instr_list[instr_list_i])
+		r_var = get_read_vars(instr_list[instr_list_i])
+		before = (liveness[i].after - set(w_var)) 
+		before = before | set(r_var)
 		liveness[i].add_before(before)
 		liveness.append(Live_vars(set([]),liveness[i].before))
 		print i,map(str,liveness[i].before),map(str,liveness[i].after)
-
+	liveness.reverse()
+	print 
+	for n in liveness:
+		print map(str,n.before), map(str,n.after)
 	# for i in range (0,3):#(0,len(instr_list)):
 	# 	print i
 	# 	liveness[i].add_before(set([i,i]))
