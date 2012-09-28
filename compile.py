@@ -245,10 +245,9 @@ def create_intrf_graph(instr_list, live_list):
 	for i in range(0, len(instr_list)-1):
 		instr = instr_list[i]
 		live_after = live_list[i].after
-		if isinstance(instr, Move86) and (instr.target in live_after):
-			print 'anne'
+		if (isinstance(instr, Move86) and isinstance(instr.target, Var) and (instr.target.name in live_after)):
 			for v in live_after:
-				if(v != instr.target.name and v != instr.value.name):
+				if v != instr.target.name:
 					if instr.target.name in interference_graph:
 						interference_graph[instr.target.name] = set([v]) | set(interference_graph[instr.target.name])
 					else:
@@ -259,7 +258,6 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name])
 					print 'here1'
 		if isinstance(instr, Add86) or isinstance(instr, Neg86):
-			print 'ben'
 			for v in live_list[i].after:
 				if(v != instr.target.name):
 					if instr.target.name in interference_graph:
@@ -270,7 +268,7 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name]) | interference_graph[v]
 					else:
 						interference_graph[v] = set([instr.target.name])
-					print 'here2'
+		if 
 
 	for key in interference_graph:
 		print key,":",map(str,interference_graph[key])
