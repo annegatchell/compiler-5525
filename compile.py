@@ -197,6 +197,28 @@ def instr_select_vars(ast, value_mode=Move86):
 	else:
 		raise Exception("Unexpected term: " + str(ast))
 
+def get_written_vars(instr):
+	if isinstance(instr, Move86) or isinstance(instr,Add86) or isinstance(instr, Neg86):
+		if isinstance(instr.target, Var):
+			return instr.target
+		else:
+			return '|'		
+	else:
+		return '|'
+
+def get_read_vars(instr):
+	if isinstance(instr, Push86) or isinstance(instr, Move86) or isinstance(instr, Add86):
+		if isinstance(instr.value, Var):
+			return instr.value
+		else:
+			return '|'
+	elif isinstance(instr, Add86) or isinstance(instr, Neg86):
+		if isinstance(instr.target, Var):
+			return instr.target
+		else:
+			return '|'
+	else:
+		return '|'
 
 def liveness_analysis(instr_list):
 	liveness = [Live_vars(set([]),set([])),]
@@ -205,6 +227,11 @@ def liveness_analysis(instr_list):
 	# print liveness[0]
 	# liveness.append(Live_vars(set([1,2,2,3,4]), set([5,5,6,7,7,8])))
 	# print liveness[1]
+	for i in range(0,len(instr_list)):
+		w_var = get_written_vars(instr_list[i])
+		r_var = get_read_vars(instr_list[i])
+		print 'r ',r_var,' w ',w_var
+
 	for i in range (0,3):#(0,len(instr_list)):
 		print i
 		liveness[i].add_before(set([i,i]))
@@ -262,7 +289,7 @@ def main():
 		print i
 	print map(str, assembly)
 
-	liveness_analysis(assembly)
+	liveness = liveness_analysis(assembly)
 
 	#write_to_file(map(str, assembly), outputFileName)
 
