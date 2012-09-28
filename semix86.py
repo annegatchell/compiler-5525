@@ -1,3 +1,16 @@
+class Live_vars:
+    def __init__(self, before, after):
+        self.before = before
+        self.after = after
+    def add_before(self, vars):
+        self.before = self.before | vars
+
+    def add_after(self, vars):
+        self.after = self.after | vars
+
+    def __str__(self):
+        return '('+ str(self.before)+','+str(self.after)+')'
+
 class X86Arg:
     def __str__(self):
         return self.mnemonic()
@@ -22,8 +35,9 @@ class Mem86(X86Arg):
         return ('-%d(%s)' % (self.offset, self.register.mnemonic()))
 
 class Var(X86Arg):
-    def  __init__(self, name):
+    def  __init__(self, name, color):
         self.name = name
+        self.color = color
     def mnemonic(self):
         return '' + self.name
     

@@ -21,6 +21,8 @@ print_stmts = 0
 
 temp_counter = -1
 
+
+
 def temp_gen(basename):
 	global temp_counter
 	temp_counter += 1
@@ -174,26 +176,45 @@ def instr_select_vars(ast, value_mode=Move86):
 		return  [Push86(instr_select_vars(ast.nodes[0])), Call86('print_int_nl'), Add86(Const86(4),ESP)]
 	elif isinstance(ast, Assign):
 		if isinstance(ast.expr, Add):
-			expr_setup = [Move86(instr_select_vars(ast.expr.left), Var(ast.nodes[0].name))]
-			return expr_setup + [Add86(instr_select_vars(ast.expr.right), Var(ast.nodes[0].name))]
+			expr_setup = [Move86(instr_select_vars(ast.expr.left), Var(ast.nodes[0].name,-1))]
+			return expr_setup + [Add86(instr_select_vars(ast.expr.right), Var(ast.nodes[0].name,-1))]
 		elif isinstance(ast.expr, UnarySub):
-			expr_setup = [Move86(instr_select_vars(ast.expr.expr), Var(ast.nodes[0].name))]
-			return expr_setup + [Neg86(Var(ast.nodes[0].name))]
+			expr_setup = [Move86(instr_select_vars(ast.expr.expr), Var(ast.nodes[0].name,-1))]
+			return expr_setup + [Neg86(Var(ast.nodes[0].name,-1))]
 		elif isinstance(ast.expr, CallFunc):
 			expr_setup = instr_select_vars(ast.expr)
-			return expr_setup + [Move86(EAX, Var(ast.nodes[0].name))]
+			return expr_setup + [Move86(EAX, Var(ast.nodes[0].name,-1))]
 		else:
-			return [Move86(instr_select_vars(ast.expr), Var(ast.nodes[0].name))]
+			return [Move86(instr_select_vars(ast.expr), Var(ast.nodes[0].name,-1))]
 	elif isinstance(ast, CallFunc):
 		return [Call86('input')]
 	elif isinstance(ast, Const):
 		return Const86(ast.value)
 	elif isinstance(ast, Name):
-		return Var(ast.name)
+		return Var(ast.name,-1)
 	elif isinstance(ast, AssName):
 		return []
 	else:
 		raise Exception("Unexpected term: " + str(ast))
+
+
+def liveness_analysis(instr_list):
+	liveness = [Live_vars(set([]),set([])),]
+	print liveness[0]
+	# liveness[0].add_before(set([3,3,3,4,4,4]))
+	# print liveness[0]
+	# liveness.append(Live_vars(set([1,2,2,3,4]), set([5,5,6,7,7,8])))
+	# print liveness[1]
+	for i in range (0,3):#(0,len(instr_list)):
+		print i
+		liveness[i].add_before(set([i,i]))
+		liveness.append(Live_vars(set([]),liveness[i].before))
+		print liveness[i]
+	liveness.reverse()
+	print '\n\n'
+	for n in liveness:
+		print n
+	return liveness
 
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
@@ -240,6 +261,8 @@ def main():
 	for i in assembly:
 		print i
 	print map(str, assembly)
+
+	liveness_analysis(assembly)
 
 	#write_to_file(map(str, assembly), outputFileName)
 
