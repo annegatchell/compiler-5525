@@ -237,13 +237,25 @@ def create_intrf_graph(instr_list, live_list):
 	test['ben'] = set([23, 22])
 	print test
 	test1 = {}
-	test1['anne'] = test['anne']
+	test1[str(instr_list[0].target)] = test['anne']
 	print test1
 
 	interference_graph = {}
+	for i in range(0, len(instr_list)-1):
+		instr = instr_list[i]
+		live_after = live_list[i].after
+		if isinstance(instr, Move86) and (instr.target in live_after):
+			print 'anne'
+			for v in live_after:
+				if(v != instr.target and v != instr.value):
+					interference_graph[str(instr.target)] = interference_graph[str(instr.target)] | set([v])
+					interference_graph[str(v)] = interference_graph[str(v)] | set([instr.target])
+					print 'here'
+		# if isinstance(instr_list[i], Add86) or isinstance(instr_list[i], Neg86):
+		# 	for v in live_list[i].after:
+		# 		if(live_list)
 
-
-
+	print interference_graph
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
