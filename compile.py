@@ -216,11 +216,6 @@ def get_read_vars(instr):
 
 def liveness_analysis(instr_list):
 	liveness = [Live_vars(set([]),set([])),]
-	# liveness[0].add_before(set([3,3,3,4,4,4]))
-	# print liveness[0]
-	# liveness.append(Live_vars(set([1,2,2,3,4]), set([5,5,6,7,7,8])))
-	# print liveness[1]
-
 	for i in range(0,len(instr_list)-1):
 		instr_list_i = len(instr_list)-1-i
 		w_var = get_written_vars(instr_list[instr_list_i])
@@ -234,17 +229,12 @@ def liveness_analysis(instr_list):
 	print 
 	for n in liveness:
 		print map(str,n.after)
-	# for i in range (0,3):#(0,len(instr_list)):
-	# 	print i
-	# 	liveness[i].add_before(set([i,i]))
-	# 	liveness.append(Live_vars(set([]),liveness[i].before))
-	# 	print liveness[i]
-	# liveness.reverse()
-	# print '\n\n'
-	# for n in liveness:
-	# 	print n
 	return liveness
 
+def create_tree(instr_list, live_list):
+	test = {'anne':set([26, 13]), 'mario':set([23, 13])}
+	test['anne'] = test['anne'] | set([13, 15, 15, 16])
+	print test
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
@@ -292,7 +282,7 @@ def main():
 	print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
-
+	create_tree(assembly, liveness)
 	#write_to_file(map(str, assembly), outputFileName)
 
 	return 0
