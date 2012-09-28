@@ -221,8 +221,6 @@ def liveness_analysis(instr_list):
 	# liveness.append(Live_vars(set([1,2,2,3,4]), set([5,5,6,7,7,8])))
 	# print liveness[1]
 
-
-
 	for i in range(0,len(instr_list)-1):
 		instr_list_i = len(instr_list)-1-i
 		w_var = get_written_vars(instr_list[instr_list_i])
@@ -231,11 +229,11 @@ def liveness_analysis(instr_list):
 		before = before | set(r_var)
 		liveness[i].add_before(before)
 		liveness.append(Live_vars(set([]),liveness[i].before))
-		print i,map(str,liveness[i].before),map(str,liveness[i].after)
+		# print i,map(str,liveness[i].before),map(str,liveness[i].after)
 	liveness.reverse()
 	print 
 	for n in liveness:
-		print map(str,n.before), map(str,n.after)
+		print map(str,n.after)
 	# for i in range (0,3):#(0,len(instr_list)):
 	# 	print i
 	# 	liveness[i].add_before(set([i,i]))

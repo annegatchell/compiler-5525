@@ -2,6 +2,7 @@
 
 -4
 x
+y
 print 4
 input()
 x + y
