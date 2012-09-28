@@ -235,6 +235,7 @@ def create_intrf_graph(instr_list, live_list):
 	test = {'anne':set([26, 13]), 'mario':set([23, 13])}
 	test['anne'] = test['anne'] | set([13, 15, 15, 16])
 	test['ben'] = set([23, 22])
+
 	print test
 	test1 = {}
 	test1[str(instr_list[0].target)] = test['anne']
@@ -247,15 +248,32 @@ def create_intrf_graph(instr_list, live_list):
 		if isinstance(instr, Move86) and (instr.target in live_after):
 			print 'anne'
 			for v in live_after:
-				if(v != instr.target and v != instr.value):
-					interference_graph[str(instr.target)] = interference_graph[str(instr.target)] | set([v])
-					interference_graph[str(v)] = interference_graph[str(v)] | set([instr.target])
-					print 'here'
-		# if isinstance(instr_list[i], Add86) or isinstance(instr_list[i], Neg86):
-		# 	for v in live_list[i].after:
-		# 		if(live_list)
+				if(v != instr.target.name and v != instr.value.name):
+					if instr.target.name in interference_graph:
+						interference_graph[instr.target.name] = set([v]) | set(interference_graph[instr.target.name])
+					else:
+						interference_graph[instr.target.name] = set([v])
+					if v in interference_graph:
+						interference_graph[v] = set([instr.target.name]) | set(interference_graph[v])
+					else:
+						interference_graph[v] = set([instr.target.name])
+					print 'here1'
+		if isinstance(instr, Add86) or isinstance(instr, Neg86):
+			print 'ben'
+			for v in live_list[i].after:
+				if(v != instr.target.name):
+					if instr.target.name in interference_graph:
+						interference_graph[instr.target.name] = set([v]) | interference_graph[instr.target.name]
+					else:
+						interference_graph[instr.target.name] = set([v])
+					if v in interference_graph:
+						interference_graph[v] = set([instr.target.name]) | interference_graph[v]
+					else:
+						interference_graph[v] = set([instr.target.name])
+					print 'here2'
 
-	print interference_graph
+	for key in interference_graph:
+		print key,":",map(str,interference_graph[key])
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
