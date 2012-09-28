@@ -268,7 +268,7 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name]) | interference_graph[v]
 					else:
 						interference_graph[v] = set([instr.target.name])
-		if 
+		# if 
 
 	for key in interference_graph:
 		print key,":",map(str,interference_graph[key])
