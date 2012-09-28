@@ -10,6 +10,17 @@ class Live_vars:
 
     def __str__(self):
         return '('+ str(self.before)+','+str(self.after)+')'
+class ColorTable:
+    def __init__(self, graph):
+        self.tbl = {}
+        for key in graph:
+            self.tbl[key] = -1
+
+    def get_color(self,node):
+        return self.tbl[node]
+    def set_color(self,node,color):
+        self.tbl[node] = color
+
 
 class X86Arg:
     def __str__(self):

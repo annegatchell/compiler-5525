@@ -282,6 +282,56 @@ def create_intrf_graph(instr_list, live_list):
 		print key,":",map(str,interference_graph[key])
 	return interference_graph
 
+# def node_saturation(node):
+
+
+def new_saturation_table(graph):
+	sat_tbl = []
+	for key in graph:
+		sat_tbl.append([0, key])
+	return sat_tbl
+
+def update_saturation_table(sat_tbl, graph, color_tbl):
+	for n in sat_tbl:
+		sat = 0
+		for i in graph[n[1]]:
+			if(color_tbl.tbl[i]) >= 0:
+				sat += 1
+		n[0] = sat
+	return sat_tbl
+
+def new_color_adj_list(graph, color_tbl):
+	adj = {}
+	for key in graph:
+		adj[key] = map(color_tbl.get_color,key)
+	return adj
+
+def graph_coloring(graph):
+	w = graph.keys()
+	color_tbl = ColorTable(graph)
+	sat_tbl = new_saturation_table(graph)
+	color_adj = new_color_adj_list(graph, color_tbl)
+	print color_tbl
+	print sat_tbl
+	print color_adj
+	current = len(w) - 1
+	#while len(w) != 0:
+	sat_tbl = update_saturation_table(sat_tbl, graph, color_tbl)
+	sat_tbl.sort
+	color_adj = new_color_adj_list(graph, color_tbl)
+	print sat_tbl
+	color = 0
+	print color_adj[w[current]]
+	while(not(color in color_adj[w[current]])):
+		color += 1
+	w.remove(w[len(sat_tbl)-1])
+	color_tbl.set_color(w[len(sat_tbl)-1],color)
+	color_adj = new_color_adj_list(graph, color_tbl)
+
+
+
+
+
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
 
@@ -330,7 +380,7 @@ def main():
 	liveness = liveness_analysis(assembly)
 	intrf_graph = create_intrf_graph(assembly, liveness)
 	#write_to_file(map(str, assembly), outputFileName)
-
+	graph_coloring(intrf_graph)
 	return 0
 
 if __name__ == '__main__':
