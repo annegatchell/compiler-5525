@@ -256,7 +256,6 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name]) | set(interference_graph[v])
 					else:
 						interference_graph[v] = set([instr.target.name])
-					print 'here1'
 		if isinstance(instr, Add86) or isinstance(instr, Neg86):
 			for v in live_list[i].after:
 				if(v != instr.target.name):
@@ -268,7 +267,24 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name]) | interference_graph[v]
 					else:
 						interference_graph[v] = set([instr.target.name])
-		# if 
+		if isinstance(instr, Call86):
+			for v in live_list[i].after:
+				if 'eax' in interference_graph:
+					interference_graph['eax'] = set([v]) | interference_graph['eax']
+				else:
+					interference_graph['eax'] = set([v])
+				if 'ecx' in interference_graph:
+					interference_graph['ecx'] = set([v]) | interference_graph['ecx']
+				else:
+					interference_graph['ecx'] = set([v])
+				if 'edx' in interference_graph:
+					interference_graph['edx'] = set([v]) | interference_graph['edx']
+				else:
+					interference_graph['edx'] = set([v])
+				if v in interference_graph:
+					interference_graph[v] = set(['eax','ecx','edx']) | interference_graph[v]
+				else:
+					interference_graph[v] = set(['eax','ecx','edx'])					
 
 	for key in interference_graph:
 		print key,":",map(str,interference_graph[key])
