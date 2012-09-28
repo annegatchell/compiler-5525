@@ -303,38 +303,46 @@ def update_saturation_table(sat_tbl, graph, color_tbl):
 def new_color_adj_list(graph, color_tbl):
 	adj = {}
 	for key in graph:
-		adj[key] = map(color_tbl.get_color,key)
+		adj[key] = map(color_tbl.get_color, graph[key])
 	return adj
 
 def graph_coloring(graph):
+	color_set = [0,1,2,3,4,5]
 	w = graph.keys()
+
 	color_tbl = ColorTable(graph)
 	sat_tbl = new_saturation_table(graph)
 	color_adj = new_color_adj_list(graph, color_tbl)
 	print color_tbl
-	print sat_tbl
 	print color_adj
-	current = len(w) - 1
-	#while len(w) != 0:
-	sat_tbl = update_saturation_table(sat_tbl, graph, color_tbl)
-	sat_tbl.sort
-	color_adj = new_color_adj_list(graph, color_tbl)
-	print sat_tbl
-	color = 0
-	print color_adj[w[current]]
-	while(not(color in color_adj[w[current]])):
-		color += 1
-	w.remove(w[len(sat_tbl)-1])
-	color_tbl.set_color(w[len(sat_tbl)-1],color)
-	color_adj = new_color_adj_list(graph, color_tbl)
-
-
-
+	
+	n = 0
+	while len(w) != 0 :
+		print 'w',w
+		current = len(w) - 1
+		sat_tbl = update_saturation_table(sat_tbl, graph, color_tbl)
+		sat_tbl.sort
+		color_adj = new_color_adj_list(graph, color_tbl)
+		print sat_tbl
+		print color_adj
+		color = min(set(color_set)-set(color_adj[w[current]]))
+		print 'color',color
+		#update color table
+		color_tbl.set_color(w[current],color)
+		w.remove(w[current])
+		print 'w',w
+		n += 1
+	print '\n\n'
+	for i in color_tbl.tbl:
+		print str(i)+":"+str(color_tbl.tbl[i])
+	return color_tbl
 
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
 
+def assign_homes(ass, color_tbl):
+	
 
 def write_to_file(assembly, outputFileName):
 	"""Function to write assembly to file"""
@@ -379,8 +387,11 @@ def main():
 
 	liveness = liveness_analysis(assembly)
 	intrf_graph = create_intrf_graph(assembly, liveness)
+	color_table = graph_coloring(intrf_graph)
+
+	assembly_final = assign_homes(assembly, color_table)
+
 	#write_to_file(map(str, assembly), outputFileName)
-	graph_coloring(intrf_graph)
 	return 0
 
 if __name__ == '__main__':
