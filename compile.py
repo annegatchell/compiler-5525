@@ -198,49 +198,47 @@ def instr_select_vars(ast, value_mode=Move86):
 		raise Exception("Unexpected term: " + str(ast))
 
 def get_written_vars(instr):
+	l = []
 	if isinstance(instr, Move86) or isinstance(instr,Add86) or isinstance(instr, Neg86):
 		if isinstance(instr.target, Var):
-			return instr.target
-		else:
-			return '|'		
-	else:
-		return '|'
+			l.append(instr.target)	
+	return l
 
 def get_read_vars(instr):
+	l = []
 	if isinstance(instr, Push86) or isinstance(instr, Move86) or isinstance(instr, Add86):
 		if isinstance(instr.value, Var):
-			return instr.value
-		else:
-			return '|'
-	elif isinstance(instr, Add86) or isinstance(instr, Neg86):
+			l.append(instr.value)
+	if isinstance(instr, Add86) or isinstance(instr, Neg86):
 		if isinstance(instr.target, Var):
-			return instr.target
-		else:
-			return '|'
-	else:
-		return '|'
+			l.append(instr.target)
+	return l
 
 def liveness_analysis(instr_list):
 	liveness = [Live_vars(set([]),set([])),]
-	print liveness[0]
 	# liveness[0].add_before(set([3,3,3,4,4,4]))
 	# print liveness[0]
 	# liveness.append(Live_vars(set([1,2,2,3,4]), set([5,5,6,7,7,8])))
 	# print liveness[1]
-	for i in range(0,len(instr_list)):
+	for i in range(0,len(instr_list)-1):
+		actual_i = len(instr_list)-1-i
 		w_var = get_written_vars(instr_list[i])
 		r_var = get_read_vars(instr_list[i])
-		print 'r ',r_var,' w ',w_var
-
-	for i in range (0,3):#(0,len(instr_list)):
-		print i
-		liveness[i].add_before(set([i,i]))
+		# print 'r ',r_var,' w ',w_var
+		before = (liveness[i].after - set(w_var)) | set(r_var)
+		liveness[i].add_before(before)
 		liveness.append(Live_vars(set([]),liveness[i].before))
-		print liveness[i]
-	liveness.reverse()
-	print '\n\n'
-	for n in liveness:
-		print n
+		print i,map(str,liveness[i].before),map(str,liveness[i].after)
+
+	# for i in range (0,3):#(0,len(instr_list)):
+	# 	print i
+	# 	liveness[i].add_before(set([i,i]))
+	# 	liveness.append(Live_vars(set([]),liveness[i].before))
+	# 	print liveness[i]
+	# liveness.reverse()
+	# print '\n\n'
+	# for n in liveness:
+	# 	print n
 	return liveness
 
 
