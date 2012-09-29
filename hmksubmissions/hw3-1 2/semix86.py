@@ -14,17 +14,9 @@ class ColorTable:
     def __init__(self, graph):
         self.tbl = {}
         for key in graph:
-            if key == 'eax':
-                self.tbl[key] = 3
-            elif key == 'ecx':
-                self.tbl[key] = 4
-            elif key == 'edx':
-                self.tbl[key] = 5
-            else:
-                self.tbl[key] = -1
+            self.tbl[key] = -1
     def get_color(self,node):
         return self.tbl[node]
-
     def set_color(self,node,color):
         self.tbl[node] = color
 

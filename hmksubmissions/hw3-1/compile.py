@@ -14,7 +14,7 @@ import sys
 import compiler
 from compiler.ast import *
 from semix86 import *
-#from parse import parse_file
+from parse import parse_file
 
 
 print_stmts = 0
@@ -403,8 +403,7 @@ def main():
 	outputFileName = outputFileName[:-3] + ".s"
 
 	#print inputFile
-	ast = compiler.parseFile(inputFile)
-	print ast
+	ast = compiler.parseFile(inputFile);
 	if(print_stmts):
 		print 'compile'+inputFilePath
 	#ast = parse_file(inputFilePath);
@@ -413,22 +412,21 @@ def main():
 		print ast, '\n\n\n'
 	fast = flatten(ast)
 
-	print 'flatten(ast)\n',fast,'\n'
+	#print 'flatten(ast)\n',fast,'\n'
 	if(print_stmts):
 		print fast
 	assembly = instr_select_vars(fast)
-	for i in assembly:
-		print i
-	print map(str, assembly)
+	# for i in assembly:
+	# 	print i
+	#print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
-	print liveness
 	intrf_graph = create_intrf_graph(assembly, liveness)
 	color_table = graph_coloring(intrf_graph)
 
 	assembly_final = assign_homes(assembly, color_table)
-	print map(str,assembly_final)
-	write_to_file(map(str, assembly_final), outputFileName)
+	#print map(str,assembly_final)
+	#write_to_file(map(str, assembly), outputFileName)
 	return 0
 
 if __name__ == '__main__':
