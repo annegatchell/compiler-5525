@@ -24,7 +24,6 @@ class ColorTable:
                 self.tbl[key] = -1
     def get_color(self,node):
         return self.tbl[node]
-
     def set_color(self,node,color):
         self.tbl[node] = color
 
