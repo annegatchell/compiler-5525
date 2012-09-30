@@ -231,9 +231,10 @@ def liveness_analysis(instr_list):
 		liveness.append(Live_vars(set([]),liveness[i].before))
 		# print i,map(str,liveness[i].before),map(str,liveness[i].after)
 	liveness.reverse()
-	# print 
-	# for n in liveness:
-	# 	print map(str,n.after)
+
+	print '\n\nLiveness'
+	for n in liveness:
+		print map(str,n.after)
 	return liveness
 
 def create_intrf_graph(instr_list, live_list):
@@ -283,8 +284,9 @@ def create_intrf_graph(instr_list, live_list):
 				else:
 					interference_graph[v] = set(['eax','ecx','edx'])					
 
-	# for key in interference_graph:
-	# 	print key,":",map(str,interference_graph[key])
+	print '\n\nInterference Graph'
+	for key in interference_graph:
+		print key,":",map(str,interference_graph[key])
 	return interference_graph
 
 # def node_saturation(node):
@@ -337,9 +339,9 @@ def graph_coloring(graph):
 		w.remove(w[current])
 		#print 'w',w
 		n += 1
-	#print '\n\n'
-	#for i in color_tbl.tbl:
-		#print str(i)+":"+str(color_tbl.tbl[i])
+	print '\n\n'
+	for i in color_tbl.tbl:
+		print str(i)+":"+str(color_tbl.tbl[i])
 	return color_tbl
 
 
@@ -366,15 +368,17 @@ def assign_homes(ass1, color_tbl):
 	for i in ass1:
 		if isinstance(i, Move86) or isinstance(i, Add86):
 			if isinstance(i.value, Var):
-				i.value = choose_register(color_tbl.get_color(i.value.name))
+				i.value = Reg86(choose_register(color_tbl.get_color(i.value.name)))
 			if isinstance(i.target, Var):
-				i.target = choose_register(color_tbl.get_color(i.target.name))
+				print i.target.name
+				i.target = Reg86(choose_register(color_tbl.get_color(i.target.name)))
+				print i.target
 		if isinstance(i, Neg86):
 			if isinstance(i.target, Var):
-				i.target = choose_register(color_tbl.get_color(i.target.name))
+				i.target = Reg86(choose_register(color_tbl.get_color(i.target.name)))
 		if isinstance(i, Push86):
 			if isinstance(i.value, Var):
-				i.value = choose_register(color_tbl.get_color(i.value.name))
+				i.value = Reg86(choose_register(color_tbl.get_color(i.value.name)))
 
 	assembly = add_header_footer_x86(ass1,0)
 	return assembly
@@ -422,7 +426,6 @@ def main():
 	print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
-	print liveness
 	intrf_graph = create_intrf_graph(assembly, liveness)
 	color_table = graph_coloring(intrf_graph)
 
