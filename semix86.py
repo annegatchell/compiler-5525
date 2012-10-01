@@ -11,9 +11,9 @@ class Live_vars:
     def __str__(self):
         return '('+ str(self.before)+','+str(self.after)+')'
 class ColorTable:
-    def __init__(self, graph):
+    def __init__(self, var_list):
         self.tbl = {}
-        for key in graph:
+        for key in var_list:
             if key == 'eax':
                 self.tbl[key] = 3
             elif key == 'ecx':

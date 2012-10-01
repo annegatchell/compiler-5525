@@ -237,19 +237,21 @@ def liveness_analysis(instr_list):
 		print map(str,n.after)
 	return liveness
 
-def initialize_intrf_graph(live_list):
-	var_list = set([])
-	for n in live_list:
-		var_list = n.after | var_list
-	print var_list
+def initialize_intrf_graph(instr_list):
+	var_list = []
+	for n in instr_list:
+		print get_written_vars(n)
+		var_list.append(get_written_vars(n))
+		var_list.append(get_read_vars(n))
+	var_list = sum(var_list,[])
+	print (set(var_list))
 	graph = {}
-	for n in var_list:
+	for n in set(var_list):
 		graph[n] = set([])
-	print graph
 	return graph
 
 def create_intrf_graph(instr_list, live_list):
-	interference_graph = initialize_intrf_graph(live_list)
+	interference_graph = initialize_intrf_graph(instr_list)
 	for i in range(0, len(instr_list)-1):
 		instr = instr_list[i]
 		live_after = live_list[i].after
@@ -331,9 +333,13 @@ def new_color_adj_list(graph, color_tbl):
 
 def graph_coloring(graph):
 	color_set = [0,1,2,3,4,5]
+	# for key in graph:
+	# 	print key,":",map(str,graph[key])
 	w = graph.keys()
-
 	color_tbl = ColorTable(graph)
+	print'\n\n'
+	for i in color_tbl.tbl:
+		print str(i)+":"+str(color_tbl.tbl[i])
 	sat_tbl = new_saturation_table(graph)
 	color_adj = new_color_adj_list(graph, color_tbl)
 	#print color_tbl
