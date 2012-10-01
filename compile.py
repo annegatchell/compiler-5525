@@ -253,19 +253,31 @@ def create_intrf_graph(instr_list, live_list):
 	for i in range(0, len(instr_list)-1):
 		instr = instr_list[i]
 		live_after = live_list[i].after
-		if (isinstance(instr, Move86) and (isinstance(instr.target, Var) or isinstance(instr.target, Reg86))):
-			#interference_graph[instr.target.name] = set([])
+		if (isinstance(instr, Move86) and (isinstance(instr.target, Var))):
 			if instr.target.name in live_after:
 				for v in live_after:
 					if v != instr.target.name:
-						if instr.target.name in interference_graph:
-							interference_graph[instr.target.name] = set([v]) | set(interference_graph[instr.target.name])
-						else:
-							interference_graph[instr.target.name] = set([v])
-						if v in interference_graph:
-							interference_graph[v] = set([instr.target.name]) | set(interference_graph[v])
-						else:
-							interference_graph[v] = set([instr.target.name])
+						if isinstance(instr.value, Var):
+							if v != instr.target.name:
+								interference_graph[instr.target.name] = set([v]) | interference_graph[instr.target.name]
+								interference_graph[v] = set([instr.target.name]) | interference_graph[v]	
+						else:	
+						#if (isinstance(instr.value, Var) and v != instr.value.name):
+							interference_graph[instr.target.name] = set([v]) | interference_graph[instr.target.name]
+							interference_graph[v] = set([instr.target.name]) | interference_graph[v]
+
+			#interference_graph[instr.target.name] = set([])
+			# if instr.target.name in live_after:
+				# for v in live_after:
+				# 	if v != instr.target.name:
+				# 		if instr.target.name in interference_graph:
+				# 			interference_graph[instr.target.name] = set([v]) | set(interference_graph[instr.target.name])
+				# 		else:
+				# 			interference_graph[instr.target.name] = set([v])
+				# 		if v in interference_graph:
+				# 			interference_graph[v] = set([instr.target.name]) | set(interference_graph[v])
+				# 		else:
+				# 			interference_graph[v] = set([instr.target.name])
 		if (isinstance(instr, Add86) or isinstance(instr, Neg86) and (isinstance(instr.target, Var) or isinstance(instr.target, Reg86))):
 			for v in live_list[i].after:
 				if(v != instr.target.name):
@@ -279,7 +291,9 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name])
 		if isinstance(instr, Call86):
 			print 'CALL'
-
+			interference_graph['eax'] = set([])
+			interference_graph['ecx'] = set([])
+			interference_graph['edx'] = set([])
 			for v in live_list[i].after:
 				if 'eax' in interference_graph:
 					interference_graph['eax'] = set([v]) | interference_graph['eax']
