@@ -232,9 +232,9 @@ def liveness_analysis(instr_list):
 		# print i,map(str,liveness[i].before),map(str,liveness[i].after)
 	liveness.reverse()
 
-	# print '\n\nLiveness'
-	# for n in liveness:
-	# 	print map(str,n.after)
+	print '\n\nLiveness'
+	for n in liveness:
+		print map(str,n.after)
 	return liveness
 
 def initialize_intrf_graph(instr_list):
@@ -280,7 +280,7 @@ def create_intrf_graph(instr_list, live_list):
 				# 			interference_graph[v] = set([instr.target.name]) | set(interference_graph[v])
 				# 		else:
 				# 			interference_graph[v] = set([instr.target.name])
-		if (isinstance(instr, Add86) or isinstance(instr, Neg86) and (isinstance(instr.target, Var) or isinstance(instr.target, Reg86))):
+		if ((isinstance(instr, Add86) or isinstance(instr, Neg86)) and (isinstance(instr.target, Var))):
 			for v in live_list[i].after:
 				if(v != instr.target.name):
 					if instr.target.name in interference_graph:
@@ -291,6 +291,7 @@ def create_intrf_graph(instr_list, live_list):
 						interference_graph[v] = set([instr.target.name]) | interference_graph[v]
 					else:
 						interference_graph[v] = set([instr.target.name])
+
 		if isinstance(instr, Call86):
 			# print 'CALL'
 			interference_graph['eax'] = set([])
@@ -302,9 +303,9 @@ def create_intrf_graph(instr_list, live_list):
 					interference_graph['edx'] = set([v]) | interference_graph['edx']
 					interference_graph[v] = set(['eax','ecx','edx']) | interference_graph[v]					
 
-	# print '\n\nInterference Graph'
-	# for key in interference_graph:
-	# 	print key,":",map(str,interference_graph[key])
+	print '\n\nInterference Graph'
+	for key in interference_graph:
+		print key,":",map(str,interference_graph[key])
 	return interference_graph
 
 # def node_saturation(node):
@@ -443,9 +444,9 @@ def main():
 	if(print_stmts):
 		print fast
 	assembly = instr_select_vars(fast)
-	# for i in assembly:
-	# 	print i
-	# print map(str, assembly)
+	for i in assembly:
+		print i
+	print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
 	intrf_graph = create_intrf_graph(assembly, liveness)
