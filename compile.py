@@ -232,19 +232,19 @@ def liveness_analysis(instr_list):
 		# print i,map(str,liveness[i].before),map(str,liveness[i].after)
 	liveness.reverse()
 
-	print '\n\nLiveness'
-	for n in liveness:
-		print map(str,n.after)
+	# print '\n\nLiveness'
+	# for n in liveness:
+	# 	print map(str,n.after)
 	return liveness
 
 def initialize_intrf_graph(instr_list):
 	var_list = []
 	for n in instr_list:
-		print get_written_vars(n)
+		# print get_written_vars(n)
 		var_list.append(get_written_vars(n))
 		var_list.append(get_read_vars(n))
 	var_list = sum(var_list,[])
-	print (set(var_list))
+	# print (set(var_list))
 	graph = {}
 	for n in set(var_list):
 		graph[n] = set([])
@@ -292,7 +292,7 @@ def create_intrf_graph(instr_list, live_list):
 					else:
 						interference_graph[v] = set([instr.target.name])
 		if isinstance(instr, Call86):
-			print 'CALL'
+			# print 'CALL'
 			interference_graph['eax'] = set([])
 			interference_graph['ecx'] = set([])
 			interference_graph['edx'] = set([])
@@ -302,9 +302,9 @@ def create_intrf_graph(instr_list, live_list):
 					interference_graph['edx'] = set([v]) | interference_graph['edx']
 					interference_graph[v] = set(['eax','ecx','edx']) | interference_graph[v]					
 
-	print '\n\nInterference Graph'
-	for key in interference_graph:
-		print key,":",map(str,interference_graph[key])
+	# print '\n\nInterference Graph'
+	# for key in interference_graph:
+	# 	print key,":",map(str,interference_graph[key])
 	return interference_graph
 
 # def node_saturation(node):
@@ -337,9 +337,9 @@ def graph_coloring(graph):
 	# 	print key,":",map(str,graph[key])
 	w = graph.keys()
 	color_tbl = ColorTable(graph)
-	print'\n\n'
-	for i in color_tbl.tbl:
-		print str(i)+":"+str(color_tbl.tbl[i])
+	# print'\n\n'
+	# for i in color_tbl.tbl:
+	# 	print str(i)+":"+str(color_tbl.tbl[i])
 	sat_tbl = new_saturation_table(graph)
 	color_adj = new_color_adj_list(graph, color_tbl)
 	#print color_tbl
@@ -361,9 +361,9 @@ def graph_coloring(graph):
 		w.remove(w[current])
 		#print 'w',w
 		n += 1
-	print '\n\nColor Table'
-	for i in color_tbl.tbl:
-		print str(i)+":"+str(color_tbl.tbl[i])
+	# print '\n\nColor Table'
+	# for i in color_tbl.tbl:
+	# 	print str(i)+":"+str(color_tbl.tbl[i])
 	return color_tbl
 
 
@@ -390,17 +390,17 @@ def assign_homes(ass1, color_tbl):
 	for i in ass1:
 		if isinstance(i, Move86) or isinstance(i, Add86):
 			if isinstance(i.value, Var):
-				i.value = Reg86(choose_register(color_tbl.get_color(i.value.name)))
+				i.value = choose_register(color_tbl.get_color(i.value.name))
 			if isinstance(i.target, Var):
-				print i.target.name
-				i.target = Reg86(choose_register(color_tbl.get_color(i.target.name)))
-				print i.target
+				# print i.target.name
+				i.target = choose_register(color_tbl.get_color(i.target.name))
+				# print i.target.register
 		if isinstance(i, Neg86):
 			if isinstance(i.target, Var):
-				i.target = Reg86(choose_register(color_tbl.get_color(i.target.name)))
+				i.target = choose_register(color_tbl.get_color(i.target.name))
 		if isinstance(i, Push86):
 			if isinstance(i.value, Var):
-				i.value = Reg86(choose_register(color_tbl.get_color(i.value.name)))
+				i.value = choose_register(color_tbl.get_color(i.value.name))
 
 	assembly = add_header_footer_x86(ass1,0)
 	return assembly
@@ -430,7 +430,7 @@ def main():
 
 	#print inputFile
 	ast = compiler.parseFile(inputFile)
-	print ast
+	# print ast
 	if(print_stmts):
 		print 'compile'+inputFilePath
 	#ast = parse_file(inputFilePath);
@@ -439,20 +439,20 @@ def main():
 		print ast, '\n\n\n'
 	fast = flatten(ast)
 
-	print 'flatten(ast)\n',fast,'\n'
+	# print 'flatten(ast)\n',fast,'\n'
 	if(print_stmts):
 		print fast
 	assembly = instr_select_vars(fast)
-	for i in assembly:
-		print i
-	print map(str, assembly)
+	# for i in assembly:
+	# 	print i
+	# print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
 	intrf_graph = create_intrf_graph(assembly, liveness)
 	color_table = graph_coloring(intrf_graph)
 
 	assembly_final = assign_homes(assembly, color_table)
-	print map(str,assembly_final)
+	# print map(str,assembly_final)
 	write_to_file(map(str, assembly_final), outputFileName)
 	return 0
 
