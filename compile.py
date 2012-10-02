@@ -18,10 +18,7 @@ from semix86 import *
 
 
 print_stmts = 0
-
 temp_counter = -1
-
-
 
 def temp_gen(basename):
 	global temp_counter
@@ -140,27 +137,17 @@ def flatten(ast):
 	else:
 	 	raise Exception('Error in flatten: unrecognized AST node'+ str(ast))
 
-def scan_allocs(ast):
-	if isinstance(ast, Module):
-		return scan_allocs(ast.node)
-	elif isinstance(ast, Stmt):
-		return reduce(lambda x,y: x.union(y), map(scan_allocs, ast.nodes), set([]))
-	elif isinstance(ast, Assign):
-		return reduce(lambda x,y: x.union(y), map(scan_allocs, ast.nodes), set([]))
-	elif isinstance(ast, AssName):
-		return set([ast.name])
-	else:
-		return set([])
-
-current_offset = 0
-stack_map = {}
-def allocate(var, size):
-	global current_offset, stack_map
-	if var in stack_map:
-		return stack_map[var]
-	current_offset = size + current_offset
-	stack_map[var] = current_offset
-	return current_offset
+# def scan_allocs(ast):
+# 	if isinstance(ast, Module):
+# 		return scan_allocs(ast.node)
+# 	elif isinstance(ast, Stmt):
+# 		return reduce(lambda x,y: x.union(y), map(scan_allocs, ast.nodes), set([]))
+# 	elif isinstance(ast, Assign):
+# 		return reduce(lambda x,y: x.union(y), map(scan_allocs, ast.nodes), set([]))
+# 	elif isinstance(ast, AssName):
+# 		return set([ast.name])
+# 	else:
+# 		return set([])
 
 
 EAX = Reg86('eax')
@@ -232,9 +219,9 @@ def liveness_analysis(instr_list):
 		# print i,map(str,liveness[i].before),map(str,liveness[i].after)
 	liveness.reverse()
 
-	print '\n\nLiveness'
-	for n in liveness:
-		print map(str,n.after)
+	# print '\n\nLiveness'
+	# for n in liveness:
+	# 	print map(str,n.after)
 	return liveness
 
 def initialize_intrf_graph(instr_list):
@@ -303,14 +290,14 @@ def create_intrf_graph(instr_list, live_list):
 					interference_graph['edx'] = set([v]) | interference_graph['edx']
 					interference_graph[v] = set(['eax','ecx','edx']) | interference_graph[v]					
 
-	print '\n\nInterference Graph'
-	for key in interference_graph:
-		print key,":",map(str,interference_graph[key])
+	# print '\n\nInterference Graph'
+	# for key in interference_graph:
+	# 	print key,":",map(str,interference_graph[key])
 	return interference_graph
 
 # def node_saturation(node):
 
-
+#List of lists denoting the saturation of the different keys in the graph
 def new_saturation_table(graph):
 	sat_tbl = []
 	for key in graph:
@@ -326,12 +313,17 @@ def update_saturation_table(sat_tbl, graph, color_tbl):
 		n[0] = sat
 	return sat_tbl
 
+#Create a color adjacency list for the given graph and color table.
+#Adjacency list returned will be a dictionary of the variables in the graph
+#with the colors of their adjacent nodes
 def new_color_adj_list(graph, color_tbl):
 	adj = {}
 	for key in graph:
 		adj[key] = map(color_tbl.get_color, graph[key])
 	return adj
 
+
+#Takes a graph and returns a dictionary of nodes and their colors
 def graph_coloring(graph):
 	color_set = [0,1,2,3,4,5]
 	# for key in graph:
@@ -355,7 +347,14 @@ def graph_coloring(graph):
 		color_adj = new_color_adj_list(graph, color_tbl)
 		#print sat_tbl
 		#print color_adj
-		color = min(set(color_set)-set(color_adj[w[current]]))
+		colors_to_pick_from = set(color_set)-set(color_adj[w[current]])
+		# print 'colors_to_pick_from1', colors_to_pick_from
+		if not colors_to_pick_from:
+			# print color_set[len(color_set)-1] + 1
+			color_set.append(color_set[len(color_set)-1] + 1)
+		colors_to_pick_from = set(color_set)-set(color_adj[w[current]])
+		# print 'colors_to_pick_from2', colors_to_pick_from
+		color = min(colors_to_pick_from)
 		#print 'color',color
 		#update color table
 		color_tbl.set_color(w[current],color)
@@ -365,11 +364,24 @@ def graph_coloring(graph):
 	# print '\n\nColor Table'
 	# for i in color_tbl.tbl:
 	# 	print str(i)+":"+str(color_tbl.tbl[i])
-	return color_tbl
+	return (color_tbl, color_set)
 
 
 def add_header_footer_x86(instructions, number_of_stack_vars, value_mode=Move86):
 	return [Push86(EBP), Move86(ESP, EBP), Sub86(Const86(number_of_stack_vars * 4), ESP)] + instructions + [Move86(Const86(0), EAX), Leave86(), Ret86()]
+
+current_offset = 0
+stack_map = {}
+def allocate(var, size):
+	global current_offset, stack_map
+	if var in stack_map:
+		return stack_map[var]
+	current_offset = size + current_offset
+	stack_map[var] = current_offset
+	return current_offset
+
+def get_num_stack_vars(colors_used, num_regs):
+	return len(colors_used) - num_regs
 
 def choose_register(c):
 	if c == 0:
@@ -384,10 +396,14 @@ def choose_register(c):
 		return ECX
 	elif c == 5:
 		return EDX
+	elif c > 5:
+		return Mem86(allocate(c,4),ESP)
 	else:
-		raise Exception("Unexpected register: " + c)
+		raise Exception("Unexpected register: " + str(c))
 
-def assign_homes(ass1, color_tbl):
+def assign_homes(ass1, color_tbl, colors_used):
+	# if not get_num_stack_vars(colors_used, 6):
+
 	for i in ass1:
 		if isinstance(i, Move86) or isinstance(i, Add86):
 			if isinstance(i.value, Var):
@@ -403,8 +419,10 @@ def assign_homes(ass1, color_tbl):
 			if isinstance(i.value, Var):
 				i.value = choose_register(color_tbl.get_color(i.value.name))
 
-	assembly = add_header_footer_x86(ass1,0)
+	assembly = add_header_footer_x86(ass1,get_num_stack_vars(colors_used,6))
 	return assembly
+
+
 			 
 def write_to_file(assembly, outputFileName):
 	"""Function to write assembly to file"""
@@ -444,15 +462,15 @@ def main():
 	if(print_stmts):
 		print fast
 	assembly = instr_select_vars(fast)
-	for i in assembly:
-		print i
-	print map(str, assembly)
+	# for i in assembly:
+	# 	print i
+	# print map(str, assembly)
 
 	liveness = liveness_analysis(assembly)
 	intrf_graph = create_intrf_graph(assembly, liveness)
-	color_table = graph_coloring(intrf_graph)
-
-	assembly_final = assign_homes(assembly, color_table)
+	(color_table, colors_used) = graph_coloring(intrf_graph)
+	# print colors_used
+	assembly_final = assign_homes(assembly, color_table, colors_used)
 	# print map(str,assembly_final)
 	write_to_file(map(str, assembly_final), outputFileName)
 	return 0
