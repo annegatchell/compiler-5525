@@ -28,10 +28,11 @@ expression ::= "True" | "False"
              | subscription
              | expression "is" expression
 expr_list ::= ε
-| expression
-| expression "," expr_list key_datum_list ::= ε
-| key_datum
-                 | key_datum "," key_datum_list
+            | expression
+            | expression "," expr_list 
+key_datum_list ::= ε
+            | key_datum
+            | key_datum "," key_datum_list
 target ::= identifier
          | subscription
 simple_statement ::= target "=" expression

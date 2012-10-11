@@ -60,7 +60,10 @@ def explicate(ast):
 			ast = mono_InjectFrom('BOOL', 0)
 		return ast
 	# elif isinstance(ast, Add):
-	# elif isinstance(ast, UnarySub):
+	elif isinstance(ast, UnarySub):
+		n = explicate(ast.expr)
+		#ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(temp), ))
+		return UnarySub(n)
 	# elif isinstance(ast, CallFunc):
 	# elif isinstance(ast, Compare):
 	# elif isinstance(ast, Or):
@@ -203,6 +206,11 @@ ECX = Reg86('ecx')
 EDX = Reg86('edx')
 ESI = Reg86('esi')
 EDI = Reg86('edi')
+
+'''
+#Deal with this here?
+#raise Exception('Error in explicate: cannot UnarySub a Dict or List'+ str(ast))
+'''
 
 def instr_select_vars(ast, value_mode=Move86):
 	if isinstance(ast,Module):
