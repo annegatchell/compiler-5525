@@ -15,6 +15,7 @@ import compiler
 from compiler.ast import *
 from semix86 import *
 #from parse import parse_file
+from monoast import *
 
 
 print_stmts = 0
@@ -29,7 +30,30 @@ def is_leaf(ast):
     return isinstance(ast, Const) or isinstance(ast, Name)
 
 def explicate(ast):
-	
+	if isinstance(ast,Module):
+		return Module(ast.doc, explicate(ast.node))
+	elif isinstance(ast, Stmt):
+		fnodes = []
+		fnodes = map(explicate, ast.nodes)
+		fnodes = sum(fnodes, [])
+		return Stmt(fnodes)
+	elif isinstance(ast, Printnl):
+	elif isinstance(ast, Assign):
+	elif isinstance(ast, AssName):
+	elif isinstance(ast, Discard):
+	elif isinstance(ast, Const):
+	elif isinstance(ast, Name):
+	elif isinstance(ast, Add):
+	elif isinstance(ast, UnarySub):
+	elif isinstance(ast, CallFunc):
+	elif isinstance(ast, Compare):
+	elif isinstance(ast, Or):
+	elif isinstance(ast, And):
+	elif isinstance(ast, Not):
+	elif isinstance(ast, List):
+	elif isinstance(ast, Dict):
+	elif isinstance(ast, Subscript):
+	elif isinstance(ast, IfExp):
 
 def flatten(ast):
 	if isinstance(ast,Module):
@@ -404,7 +428,7 @@ def choose_register(c):
 	else:
 		raise Exception("Unexpected register: " + str(c))
 
-def spill_code(ass1, color_tbl, colors_used):
+# def spill_code(ass1, color_tbl, colors_used):
 
 def assign_homes(ass1, color_tbl, colors_used):
 	# if not get_num_stack_vars(colors_used, 6):
@@ -458,29 +482,33 @@ def main():
 	if(print_stmts):
 		print 'compile'+inputFilePath
 	#ast = parse_file(inputFilePath);
+	print ast
+
+	explicit_ast = explicate(ast)
+	print explicit_ast
 
 	if(print_stmts):
 		print ast, '\n\n\n'
-	fast = flatten(ast)
+	# fast = flatten(ast)
 
-	# print 'flatten(ast)\n',fast,'\n'
-	if(print_stmts):
-		print fast
-	assembly = instr_select_vars(fast)
-	# for i in assembly:
-	# 	print i
-	# print map(str, assembly)
+	# # print 'flatten(ast)\n',fast,'\n'
+	# if(print_stmts):
+	# 	print fast
+	# assembly = instr_select_vars(fast)
+	# # for i in assembly:
+	# # 	print i
+	# # print map(str, assembly)
 
-	liveness = liveness_analysis(assembly)
-	intrf_graph = create_intrf_graph(assembly, liveness)
-	(color_table, colors_used) = graph_coloring(intrf_graph)
-	# print colors_used
-	if not spill_code(assembly, color_table, colors_used):
+	# liveness = liveness_analysis(assembly)
+	# intrf_graph = create_intrf_graph(assembly, liveness)
+	# (color_table, colors_used) = graph_coloring(intrf_graph)
+	# # print colors_used
+	# if not spill_code(assembly, color_table, colors_used):
 		
 
-	assembly_final = assign_homes(assembly, color_table, colors_used)
-	# print map(str,assembly_final)
-	write_to_file(map(str, assembly_final), outputFileName)
+	# assembly_final = assign_homes(assembly, color_table, colors_used)
+	# # print map(str,assembly_final)
+	# write_to_file(map(str, assembly_final), outputFileName)
 	return 0
 
 if __name__ == '__main__':
