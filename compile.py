@@ -59,11 +59,16 @@ def explicate(ast):
 		elif(ast.name == 'False'):
 			ast = mono_InjectFrom('BOOL', 0)
 		return ast
-	# elif isinstance(ast, Add):
+	elif isinstance(ast, Add):
+		e_l = explicate(ast.left)
+		e_r = explicate(ast.right)
+		temp_l = temp_gen('exp_addLeft')
+		temp_r = temp_gen('exp_addRight')
+		ast = Let(temp_l, e_l, Let(temp_r, e_r, IfExp()))
 	elif isinstance(ast, UnarySub):
 		n = explicate(ast.expr)
-		#ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(temp), ))
-		return UnarySub(n)
+		ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(temp), ))
+		return ast
 	# elif isinstance(ast, CallFunc):
 	# elif isinstance(ast, Compare):
 	# elif isinstance(ast, Or):

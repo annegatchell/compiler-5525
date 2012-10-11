@@ -49,3 +49,11 @@ class mono_Let(mono_Node):
         self.body = body
     def __repr__(self):
         return "mono_Let(%s, %s, %s)" % (repr(self.var), repr(self.rhs), repr(self.body))
+
+class mono_Error(mono_Node):
+    """Store an error to raise an exception at runtime"""
+    def __init__(self, typ, string):
+        self.typ = typ
+        sel.string = string
+    def __repr__(self):
+        return "mono_Error(%s, %s)" % (repr(self.typ), repr(self.string))
