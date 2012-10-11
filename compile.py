@@ -36,7 +36,11 @@ def explicate(ast):
 		fnodes = map(explicate, ast.nodes)
 		return Stmt(fnodes)
 	elif isinstance(ast, Printnl):
-
+		n = explicate(ast.nodes)
+		temp = temp_gen('exp_print')
+		#ast = mono_Let(temp, n, IfExp(mono_IsTag('INT', temp), Printnl(temp, ast.dest), IfExp(mono_IsTag('BOOL', temp), CallFunc(Name('print_bool'),temp, None, None), )))
+		ast = mono_Let(temp, n, CallFunc(Name('print_pyobj'),temp, None, None))
+		return ast
 	elif isinstance(ast, Assign):
 		n = explicate(ast.nodes)
 		e = explicate(ast.expr)
