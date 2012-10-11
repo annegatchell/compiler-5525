@@ -33,9 +33,7 @@ def explicate(ast):
 	if isinstance(ast,Module):
 		return Module(ast.doc, explicate(ast.node))
 	elif isinstance(ast, Stmt):
-		fnodes = []
 		fnodes = map(explicate, ast.nodes)
-		fnodes = sum(fnodes, [])
 		return Stmt(fnodes)
 	# elif isinstance(ast, Printnl):
 	# elif isinstance(ast, Assign):
