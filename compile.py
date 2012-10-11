@@ -39,12 +39,13 @@ def explicate(ast):
 		return Stmt(fnodes)
 	# elif isinstance(ast, Printnl):
 	# elif isinstance(ast, Assign):
+
 	# elif isinstance(ast, AssName):
 	# elif isinstance(ast, Discard):
 	elif isinstance(ast, Const):
-		return (ast, [])
+		return (ast)
 	elif isinstance(ast, Name):
-		return (ast, [])
+		return (ast)
 	# elif isinstance(ast, Add):
 	# elif isinstance(ast, UnarySub):
 	# elif isinstance(ast, CallFunc):
@@ -87,8 +88,6 @@ def flatten(ast):
 			print 'IN PRINT STATEMENTS',stmts + [Printnl(prints, ast.dest)]
 		return stmts + [Printnl(prints, ast.dest)]
 	elif isinstance(ast, Assign):
-		#print 'ASSIGN'
-		#print 'assign',ast
 		fnodes = map(flatten, ast.nodes)
 		assigns = [t for (t, l) in fnodes]
 		stmts = sum([l for (t, l) in fnodes], [])
