@@ -64,11 +64,11 @@ def explicate(ast):
 	# 	e_r = explicate(ast.right)
 	# 	temp_l = temp_gen('exp_addLeft')
 	# 	temp_r = temp_gen('exp_addRight')
-	# 	ast = Let(temp_l, e_l, Let(temp_r, e_r, IfExp()))
+	# 	ast = Let(temp_l, e_l, Let(temp_r, e_r, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]),)))
 	elif isinstance(ast, UnarySub):
 		n = explicate(ast.expr)
 		temp = temp_gen('exp_usub')
-		ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(temp), mono_Error('Error: Cannot UnarySub a Disct or List')))
+		ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(mono_ProjectTo('INT',temp)), mono_Error('Error: Cannot UnarySub a Disct or List')))
 		return ast
 	# elif isinstance(ast, CallFunc):
 	# elif isinstance(ast, Compare):
