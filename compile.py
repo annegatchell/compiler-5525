@@ -37,23 +37,25 @@ def explicate(ast):
 		fnodes = map(explicate, ast.nodes)
 		fnodes = sum(fnodes, [])
 		return Stmt(fnodes)
-	elif isinstance(ast, Printnl):
-	elif isinstance(ast, Assign):
-	elif isinstance(ast, AssName):
-	elif isinstance(ast, Discard):
+	# elif isinstance(ast, Printnl):
+	# elif isinstance(ast, Assign):
+	# elif isinstance(ast, AssName):
+	# elif isinstance(ast, Discard):
 	elif isinstance(ast, Const):
+		return (ast, [])
 	elif isinstance(ast, Name):
-	elif isinstance(ast, Add):
-	elif isinstance(ast, UnarySub):
-	elif isinstance(ast, CallFunc):
-	elif isinstance(ast, Compare):
-	elif isinstance(ast, Or):
-	elif isinstance(ast, And):
-	elif isinstance(ast, Not):
-	elif isinstance(ast, List):
-	elif isinstance(ast, Dict):
-	elif isinstance(ast, Subscript):
-	elif isinstance(ast, IfExp):
+		return (ast, [])
+	# elif isinstance(ast, Add):
+	# elif isinstance(ast, UnarySub):
+	# elif isinstance(ast, CallFunc):
+	# elif isinstance(ast, Compare):
+	# elif isinstance(ast, Or):
+	# elif isinstance(ast, And):
+	# elif isinstance(ast, Not):
+	# elif isinstance(ast, List):
+	# elif isinstance(ast, Dict):
+	# elif isinstance(ast, Subscript):
+	# elif isinstance(ast, IfExp):
 
 def flatten(ast):
 	if isinstance(ast,Module):
