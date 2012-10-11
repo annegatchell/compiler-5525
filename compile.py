@@ -47,7 +47,9 @@ def explicate(ast):
 		return Assign(n,e)
 	elif isinstance(ast, AssName):
 		return ast
-	# elif isinstance(ast, Discard):
+	elif isinstance(ast, Discard):
+		n = explicate(ast.expr)
+		return Discard(n)
 	elif isinstance(ast, Const):
 		ast = mono_InjectFrom('INT', ast.value)
 		return ast
@@ -66,8 +68,10 @@ def explicate(ast):
 	# elif isinstance(ast, Not):
 	elif isinstance(ast, List):
 		ast = mono_InjectFrom('BIGPYOBJ', ast)
+		return ast
 	elif isinstance(ast, Dict):
 		ast = mono_InjectFrom('BIGPYOBJ', ast)
+		return ast
 	# elif isinstance(ast, Subscript):
 	# elif isinstance(ast, IfExp):
 
