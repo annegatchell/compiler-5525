@@ -35,7 +35,8 @@ def explicate(ast):
 	elif isinstance(ast, Stmt):
 		fnodes = map(explicate, ast.nodes)
 		return Stmt(fnodes)
-	# elif isinstance(ast, Printnl):
+	elif isinstance(ast, Printnl):
+
 	elif isinstance(ast, Assign):
 		n = explicate(ast.nodes)
 		e = explicate(ast.expr)
@@ -491,7 +492,7 @@ def main():
 	if(print_stmts):
 		print 'compile'+inputFilePath
 	#ast = parse_file(inputFilePath);
-	print ast
+	print ast, '\n\n\n'
 
 	explicit_ast = explicate(ast)
 	print explicit_ast
