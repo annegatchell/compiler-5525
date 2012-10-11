@@ -8,3 +8,4 @@ z[True] = y
 y = x
 y = z
 y = input()
+y = z[42]

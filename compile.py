@@ -39,12 +39,18 @@ def explicate(ast):
 	elif isinstance(ast, Assign):
 		n = explicate(ast.nodes)
 		e = explicate(ast.expr)
-		return Assign(n, e)
-	# elif isinstance(ast, AssName):
+		return Assign(n,e)
+	elif isinstance(ast, AssName):
+		return ast
 	# elif isinstance(ast, Discard):
 	elif isinstance(ast, Const):
+		ast = mono_InjectFrom('INT', ast.value)
 		return ast
 	elif isinstance(ast, Name):
+		if(ast.name == 'True'):
+			ast = mono_InjectFrom('BOOL', 1)
+		elif(ast.name == 'False'):
+			ast = mono_InjectFrom('BOOL', 0)
 		return ast
 	# elif isinstance(ast, Add):
 	# elif isinstance(ast, UnarySub):
@@ -53,8 +59,10 @@ def explicate(ast):
 	# elif isinstance(ast, Or):
 	# elif isinstance(ast, And):
 	# elif isinstance(ast, Not):
-	# elif isinstance(ast, List):
-	# elif isinstance(ast, Dict):
+	elif isinstance(ast, List):
+		ast = mono_InjectFrom('BIGPYOBJ', ast)
+	elif isinstance(ast, Dict):
+		ast = mono_InjectFrom('BIGPYOBJ', ast)
 	# elif isinstance(ast, Subscript):
 	# elif isinstance(ast, IfExp):
 
