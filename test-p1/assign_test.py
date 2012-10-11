@@ -7,3 +7,4 @@ z[42] = False
 z[True] = y
 y = x
 y = z
+y = input()

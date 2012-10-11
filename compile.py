@@ -36,14 +36,16 @@ def explicate(ast):
 		fnodes = map(explicate, ast.nodes)
 		return Stmt(fnodes)
 	# elif isinstance(ast, Printnl):
-	# elif isinstance(ast, Assign):
-
+	elif isinstance(ast, Assign):
+		n = explicate(ast.nodes)
+		e = explicate(ast.expr)
+		return Assign(n, e)
 	# elif isinstance(ast, AssName):
 	# elif isinstance(ast, Discard):
 	elif isinstance(ast, Const):
-		return (ast)
+		return ast
 	elif isinstance(ast, Name):
-		return (ast)
+		return ast
 	# elif isinstance(ast, Add):
 	# elif isinstance(ast, UnarySub):
 	# elif isinstance(ast, CallFunc):
