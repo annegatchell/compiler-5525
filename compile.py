@@ -28,6 +28,9 @@ def temp_gen(basename):
 def is_leaf(ast):
     return isinstance(ast, Const) or isinstance(ast, Name)
 
+def explicate(ast):
+	
+
 def flatten(ast):
 	if isinstance(ast,Module):
 		if(print_stmts):
@@ -401,6 +404,8 @@ def choose_register(c):
 	else:
 		raise Exception("Unexpected register: " + str(c))
 
+def spill_code(ass1, color_tbl, colors_used):
+
 def assign_homes(ass1, color_tbl, colors_used):
 	# if not get_num_stack_vars(colors_used, 6):
 
@@ -470,6 +475,9 @@ def main():
 	intrf_graph = create_intrf_graph(assembly, liveness)
 	(color_table, colors_used) = graph_coloring(intrf_graph)
 	# print colors_used
+	if not spill_code(assembly, color_table, colors_used):
+		
+
 	assembly_final = assign_homes(assembly, color_table, colors_used)
 	# print map(str,assembly_final)
 	write_to_file(map(str, assembly_final), outputFileName)

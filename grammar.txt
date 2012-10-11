@@ -1,0 +1,37 @@
+pO
+------
+program ::= module
+            module ::= simple_statement+
+            simple_statement ::= "print" expression
+                               | name "=" expression
+                               | expression
+            expression ::= name
+                         | decimalinteger
+                         | "-" expression
+                         | expression "+" expression
+                         | "(" expression ")"
+                         | "input" "(" ")"
+
+p1
+-------
+key_datum ::= expression ":" expression
+subscription ::= expression "[" expression "]"
+expression ::= "True" | "False"
+             | "not" expression
+             | expression "and" expression
+             | expression "or" expression
+             | expression "==" expression
+             | expression "!=" expression
+             | expression "if" expression "else" expression
+             | "[" expr_list "]"
+             | "{" key_datum_list "}"
+             | subscription
+             | expression "is" expression
+expr_list ::= ε
+| expression
+| expression "," expr_list key_datum_list ::= ε
+| key_datum
+                 | key_datum "," key_datum_list
+target ::= identifier
+         | subscription
+simple_statement ::= target "=" expression
