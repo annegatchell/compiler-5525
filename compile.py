@@ -42,8 +42,8 @@ def explicate(ast):
 		ast = mono_Let(temp, n, CallFunc(Name('print_pyobj'),temp, None, None))
 		return ast
 	elif isinstance(ast, Assign):
-		n = explicate(ast.nodes)
-		e = explicate(ast.expr)
+		n = map(explicate,ast.nodes)
+		e = map(explicate,ast.expr)
 		return Assign(n,e)
 	elif isinstance(ast, AssName):
 		return ast
@@ -59,22 +59,47 @@ def explicate(ast):
 		elif(ast.name == 'False'):
 			ast = mono_InjectFrom('BOOL', 0)
 		return ast
-	# elif isinstance(ast, Add):
-	# 	e_l = explicate(ast.left)
-	# 	e_r = explicate(ast.right)
-	# 	temp_l = temp_gen('exp_addLeft')
-	# 	temp_r = temp_gen('exp_addRight')
-	# 	ast = Let(temp_l, e_l, Let(temp_r, e_r, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]),)))
+	elif isinstance(ast, Add):
+		e_l = explicate(ast.left)
+		e_r = explicate(ast.right)
+		temp_l = temp_gen('exp_addLeft')
+		temp_r = temp_gen('exp_addRight')
+		or1 = Or([mono_IsTag('INT', temp_l), mono_IsTag('BOOL',temp_l)])
+		or2 = Or([mono_IsTag('INT', temp_r), mono_IsTag('BOOL',temp_r)])
+		and1 = And(or1,or2)
+		and2 = And(mono_IsTag('BIGPYOBJ', temp_l), mono_IsTag('BIGPYOBJ', temp_r))
+		callf1 = CallFunc(Name('add'),[mono_ProjectTo('BIGPYOBJ',temp_l), mono_ProjectTo('BIGPYOBJ',temp_r)],None, None)
+		ifexp2 = IfExp(and2,callf1,mono_Error('Error: Cannot add a Dict and a List'))
+		ifexp1 = IfExp(and1,Add([mono_ProjectTo('INT',temp_l), mono_ProjectTo('INT',temp_r)]), ifexp2)
+		let_1 = mono_Let(temp_r, e_r, ifexp1)
+		ast = mono_Let(temp_l, e_l, let_1)
+		# ast = Let(temp_l, e_l, Let(temp_r, e_r, IfExp(And(Or([mono_IsTag('INT', temp_l), mono_IsTag('BOOL',temp_l)]),Or([mono_IsTag('INT', temp_r), mono_IsTag('BOOL',temp_r)])),))
+		return ast
 	elif isinstance(ast, UnarySub):
 		n = explicate(ast.expr)
 		temp = temp_gen('exp_usub')
-		ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(mono_ProjectTo('INT',temp)), mono_Error('Error: Cannot UnarySub a Disct or List')))
+		ast = mono_Let(temp, n, IfExp(Or([mono_IsTag('INT', temp), mono_IsTag('BOOL',temp)]), UnarySub(mono_ProjectTo('INT',temp)), mono_Error('Error: Cannot UnarySub a Dict or List')))
 		return ast
-	# elif isinstance(ast, CallFunc):
-	# elif isinstance(ast, Compare):
-	# elif isinstance(ast, Or):
-	# elif isinstance(ast, And):
-	# elif isinstance(ast, Not):
+	elif isinstance(ast, CallFunc):
+		n = explicate(ast.node)
+		a = explicate(ast.args)
+		ast = CallFunc(n,a)
+		return ast
+	elif isinstance(ast, Compare):
+		e = explicate(ast.expr)
+		op = ast.ops[0][0]
+		o = map(explicate,ast.ops[0][1])
+		ast = Compare(e,[(op,o)])
+		return ast
+	elif isinstance(ast, Or):
+		n = map(explicate, ast.nodes)
+		return Or(n)
+	elif isinstance(ast, And):
+		n = map(explicate, ast.nodes)
+		return And(n)
+	elif isinstance(ast, Not):
+		e = explicate(ast.expr)
+		return Not(e)
 	elif isinstance(ast, List):
 		ast = mono_InjectFrom('BIGPYOBJ', ast)
 		return ast
